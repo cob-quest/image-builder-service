@@ -1,0 +1,5 @@
+docker
+GitPython
+boto3
+botocore
+python-dotenv
