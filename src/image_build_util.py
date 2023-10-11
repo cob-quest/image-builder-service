@@ -1,5 +1,5 @@
 import docker
-import zipfile, subprocess
+import zipfile, subprocess, os
 
 # from git import Repo
 from logger import logger
@@ -7,6 +7,28 @@ from aws_s3_connector import download_from_s3
 
 # Connect to docker using default socket
 client = docker.from_env()
+
+# Retrieve container registry info from env
+GITLAB_REGISTRY = os.getenv("GITLAB_REGISTRY")
+GITLAB_USERNAME = os.getenv("GITLAB_USERNAME")
+GITLAB_PASSWORD = os.getenv("GITLAB_PASSWORD")
+
+# Login to Gitlab Container Registry
+client.login(
+    registry=GITLAB_REGISTRY,
+    username=GITLAB_USERNAME,
+    password=GITLAB_PASSWORD
+)
+
+
+def push_image(image_name: str, image_version: str):
+    logger.info(f"Pushing image {image_name}:{image_version} to Gitlab Container Registry")
+    
+    return client.images.push(
+        repository=f"{GITLAB_REGISTRY}/{image_name}:{image_version}",
+        stream=True
+    )
+
 
 def build_image(image_name: str, image_version: str):
     '''
@@ -17,12 +39,12 @@ def build_image(image_name: str, image_version: str):
     Returns: The newly build ``image``(Image)
     '''
     
-    logger.info("Building image from Dockerfile...")
+    logger.info(f"Building image {image_name}:{image_version} from Dockerfile...")
     
     return client.images.build(
         path='./image_to_build/',
         dockerfile='Dockerfile',
-        tag=f"{image_name}:{image_version}"
+        tag=f"{GITLAB_REGISTRY}/{image_name}:{image_version}"
     )
 
 
@@ -91,6 +113,10 @@ def handle_message(message: dict) -> None:
         # Build image
         image_built = build_image(message['image_name'], message['image_ver'])
         logger.info(f"Image built SUCCESS: {image_built}")
+        
+        # Push image
+        image_pushed = push_image(message['image_name'], message['image_ver'])
+        logger.info(f"Image pushed SUCCESS: {image_pushed}")
         return True
     
     except Exception as e:
