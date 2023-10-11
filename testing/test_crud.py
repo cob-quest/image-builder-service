@@ -13,7 +13,7 @@ parent = os.path.dirname(current)
 # the sys.path.
 sys.path.append(parent)
 
-import crud_functions
+import src.crud_functions as crud_functions
 
 def crud_challenges_success():
     ch1 = {

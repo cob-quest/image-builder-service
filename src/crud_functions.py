@@ -2,7 +2,6 @@ from models.Challenge import Challenge
 from models.Response import Response
 import db.db_connection as db_connection
 from pymongo import errors
-import testing.test_crud as test
 
 def get_all_challenges():
     """Get all challenges
