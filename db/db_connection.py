@@ -9,7 +9,7 @@ mongo_uri = os.getenv("MONGOURI")
 client = MongoClient(mongo_uri)
     
 def get_db_collection():
-    """Get the Database `challenges` which has a Collection `challenge`.
+    """Get the Database `cs302` which has a Collection `challenge`.
 
     Returns:
         Collection: A MongoClient collection
@@ -18,7 +18,7 @@ def get_db_collection():
         DatabaseConnectionError: Connection error to database, and connection is not established
     """
     try:
-        db = client.challenges
+        db = client.cs302
         challenge_collection = db['challenge']
 
         # No duplcation of 'image_url' field
