@@ -1,5 +1,7 @@
-docker
-GitPython
-boto3
-botocore
-python-dotenv
+docker==6.1.3
+GitPython==3.1.37
+boto3==1.28.62
+botocore==1.31.62
+python-dotenv==1.0.0
+Flask==2.3.2
+Flask-Cors==4.0.0

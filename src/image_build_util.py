@@ -1,7 +1,7 @@
 import docker
 import zipfile, subprocess
 
-from git import Repo
+# from git import Repo
 from logger import logger
 from aws_s3_connector import download_from_s3
 
@@ -47,14 +47,16 @@ def extract_from_zip(zip_filename: str) -> None:
         raise
 
 
-def clone_from_git(git_link: str) -> None:
-    try:
-        repo = Repo.clone_from(git_link, './image_to_build')
-        logger.info(f"Cloned repo from Git | {repo}")
+# def clone_from_git(git_link: str) -> None:
+#     # TODO: Implement a method of authentication that is not username and passworrd
     
-    except Exception as e:
-        logger.error(e)
-        raise
+#     try:
+#         repo = Repo.clone_from(git_link, './image_to_build')
+#         logger.info(f"Cloned repo from Git | {repo}")
+    
+#     except Exception as e:
+#         logger.error(e)
+#         raise
 
 
 def set_up_image_to_build(message: dict) -> bool:
@@ -70,8 +72,8 @@ def set_up_image_to_build(message: dict) -> bool:
             download_from_s3(message['filename'])
             extract_from_zip(message['filename'])
             
-        elif message['type'] == 'GIT':
-            clone_from_git(message['link'])
+        # elif message['type'] == 'GIT':
+        #     clone_from_git(message['link'])
         return True
     
     except:
@@ -83,34 +85,38 @@ def handle_message(message: dict) -> None:
     # Set up image_to_build directory
     if not set_up_image_to_build(message):
         logger.info("Unable to set up image_to_build Directory... Exiting")
-        return
+        return False
     
     try:
         # Build image
         image_built = build_image(message['image_name'], message['image_ver'])
         logger.info(f"Image built SUCCESS: {image_built}")
+        return True
     
     except Exception as e:
         logger.error(e)
+        return False
     
     finally:
         # Clear image_to_build directory
-        subprocess.run("rm -rf image_to_build/; mkdir image_to_build/")
+        subprocess.run(["rm", "-rf", "image_to_build/"])
+        subprocess.run(["mkdir", "image_to_build/"])
         logger.info("Cleared image_to_build directory")
 
 
 message1 = {
-    'type': 'ZIP',
-    'filename': 'games_test.zip',
-    'image_name': 'games-sdk-test',
-    'image_ver': '1.0'
+    "type": "ZIP",
+    "filename": "games_test.zip",
+    "image_name": "games-sdk-test",
+    "image_ver": "1.0"
 }
 
 message2 = {
-    'type': 'GIT',
-    'link': 'https://github.com/hongyao38/cs302-test-repo.git',
-    'image_name': 'orders-sdk-test',
-    'image_ver': '1.0'
+    "type": "GIT",
+    "link": "https://github.com/hongyao38/cs302-test-repo.git",
+    "image_name": "orders-sdk-test",
+    "image_ver": "1.0"
 }
 
-handle_message(message2)
+# handle_message(message1)
+
