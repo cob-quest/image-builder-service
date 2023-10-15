@@ -24,10 +24,13 @@ client.login(
 def push_image(image_name: str, image_version: str):
     logger.info(f"Pushing image {image_name}:{image_version} to Gitlab Container Registry")
     
-    return client.images.push(
+    resp = client.images.push(
         repository=f"{GITLAB_REGISTRY}/{image_name}:{image_version}",
         stream=True
     )
+    
+    for line in resp:
+        logger.debug(line)
 
 
 def build_image(image_name: str, image_version: str):
@@ -44,7 +47,8 @@ def build_image(image_name: str, image_version: str):
     return client.images.build(
         path='./image_to_build/',
         dockerfile='Dockerfile',
-        tag=f"{GITLAB_REGISTRY}/{image_name}:{image_version}"
+        tag=f"{GITLAB_REGISTRY}/{image_name}:{image_version}",
+        rm=True
     )
 
 

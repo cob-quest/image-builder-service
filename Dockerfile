@@ -1,7 +1,7 @@
 FROM docker:stable-dind
 
-# Set up Python
-RUN apk update && apk add --no-cache python3 python3-dev py3-pip
+# Set up Python and Git
+RUN apk update && apk add --no-cache python3 python3-dev py3-pip git
 
 # Set symbolic link from python3 to python
 RUN ln -s /usr/bin/python3 /usr/bin/python
@@ -20,4 +20,4 @@ COPY ./ /usr/image_builder/
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Run the app
-CMD ["python3", "src/app.py"]
+CMD ["python3", "src/main.py"]

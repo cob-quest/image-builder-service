@@ -1,0 +1,30 @@
+version: '3'
+volumes:
+  rabbitmq_data:
+services:
+  ################################
+  # ImageBuilder: App Service
+  ################################
+  # image-builder:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile
+  #   image: image-builder:1.0
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   privileged: true
+
+  ################################
+  # RabbitMQ: Message Broker
+  ################################
+  rabbitmq:
+    image: rabbitmq:3-management
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
