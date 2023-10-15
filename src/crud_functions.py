@@ -66,13 +66,13 @@ def add_challenge(data={}):
         JSON: JSON object of the response result
     """
     if not data:
-        return Response("Bad Request", "Request body cannot be empty and challenge body is required")
+        return Response("Bad Request", "Request body cannot be empty and challenge body is required").to_dict()
 
     challenge_data = Challenge(**data)
     is_valid, err = challenge_data.validate()
 
     if not is_valid:
-        return Response("Bad request", err)
+        return Response("Bad request", err).to_dict()
     else:
         challenge = challenge_data.to_dict()
         try:
@@ -82,9 +82,10 @@ def add_challenge(data={}):
             if res.inserted_id:
                 return Response("Successfully created", challenge).to_dict()
             else:
-                return Response("Internal Server Error", "Data was not inserted properly into the database")
+                return Response("Internal Server Error", "Data was not inserted properly into the database").to_dict()
         except errors.DuplicateKeyError as e:
-            return Response("Bad Request", f"Image URL {challenge['image_url']} is duplicated!").to_dict()
+            print(e)
+            return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
 def update_challenge_by_id(data={}):
@@ -120,7 +121,7 @@ def update_challenge_by_id(data={}):
             else:
                 return Response("Not Found", "Challenge not found").to_dict()
         except errors.DuplicateKeyError as e:
-            return Response("Bad Request", f"Image URL {challenge['image_url']} is duplicated!").to_dict()
+            return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
 def delete_challenges_by_ids(data={}):
@@ -163,4 +164,21 @@ def delete_challenges_by_ids(data={}):
             return Response("Not Found", {"Found": found, "Not Found": not_found}).to_dict()
             
     else:
-        return Response("Internal Server Error", f"Unable to delete all records").to_dict()
+        return Response("Internal Server Error", "Unable to delete all records").to_dict()
+
+def delete_all_challenges():
+    challenge_collection = db_connection.get_db_collection()
+
+    challenges = challenge_collection.find()
+    res = {}
+
+    for challenge in challenges:
+        id = challenge.pop("_id")
+        res[id] = challenge
+
+    deleted = challenge_collection.delete_many({})
+
+    if deleted.acknowledged:
+        return Response("Success", res).to_dict()
+    else:
+        return Response("Internal Server Error", "Unable to delete all records").to_dict()
