@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 from . import DatabaseConnectionError
 from pymongo import MongoClient, errors
+import pymongo
 
 load_dotenv()
 
@@ -21,8 +22,11 @@ def get_db_collection():
         db = client.cs302
         challenge_collection = db['challenge']
 
-        # No duplcation of 'image_url' field
-        challenge_collection.create_index(['image_url'], unique=True)
+        # No duplcation of 'image_name' and 'image_ver' field
+        challenge_collection.create_index([
+            ('image_name', pymongo.ASCENDING),
+            ('image_ver', pymongo.DESCENDING)
+        ])
 
         return challenge_collection
     except errors.ServerSelectionTimeoutError as e:
