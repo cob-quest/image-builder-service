@@ -1,6 +1,6 @@
 import pika
 import json
-import os
+import os, time
 
 from dotenv import load_dotenv
 from image_build_util import handle_message
@@ -12,9 +12,19 @@ MQ_HOSTNAME = os.getenv("MQ_HOSTNAME")
 MQ_PORT = os.getenv("MQ_PORT")
 
 # Create a connection and channel
-connection = pika.BlockingConnection(pika.ConnectionParameters(MQ_HOSTNAME, MQ_PORT))
-channel = connection.channel()
+retry_timer = 2
+while True:
+    try:
+        connection = pika.BlockingConnection(pika.ConnectionParameters(MQ_HOSTNAME, MQ_PORT))
+        logger.info("Connected to Rabbit MQ SUCCESS!")
+        break
+    except:
+        logger.info(f"Connecting to RabbitMQ Failed... Retrying in {retry_timer} seconds")
+        time.sleep(retry_timer)
+        retry_timer += 2
 
+
+channel = connection.channel()
 # Queues and exchange's names
 TO_SERVICE_QUEUE = 'queue.imageBuilder.toService'
 FROM_SERVICE_QUEUE = 'queue.imageBuilder.fromService'
