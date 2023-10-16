@@ -3,7 +3,7 @@ import zipfile, subprocess, os
 
 from git import Repo
 from logger import logger
-from aws_s3_connector import download_from_s3
+from bucket_connector import download_from_bucket
 
 # Connect to docker using default socket
 client = docker.from_env()
@@ -96,7 +96,7 @@ def set_up_image_to_build(message: dict) -> bool:
     # Depending on message, type, download files from S3 or clone from git
     try:
         if message['type'] == 'ZIP':
-            download_from_s3(message['filename'])
+            download_from_bucket(message['filename'])
             extract_from_zip(message['filename'])
             
         elif message['type'] == 'GIT':
