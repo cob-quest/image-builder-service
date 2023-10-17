@@ -26,7 +26,7 @@ def get_db_collection():
         challenge_collection.create_index([
             ('image_name', pymongo.ASCENDING),
             ('image_ver', pymongo.DESCENDING)
-        ])
+        ], unique=True)
 
         return challenge_collection
     except errors.ServerSelectionTimeoutError as e:
