@@ -3,13 +3,17 @@ from models.Response import Response
 import db.db_connection as db_connection
 from pymongo import errors
 
-def get_all_challenges():
+def get_all_challenges(challenge_collection=None):
     """Get all challenges
+
+    Args:
+        challenge_collection(Collection, optional): A MongoDB collection connection. Default to None
 
     Returns:
         JSON: JSON objects for all the challenges that are created
     """
-    challenge_collection = db_connection.get_db_collection()
+    if not challenge_collection:
+        challenge_collection = db_connection.get_db_collection()
 
     records = challenge_collection.find()
     
@@ -24,12 +28,13 @@ def get_all_challenges():
         return Response("Internal Server Error", "Unable to read data").to_dict()
 
 
-def get_challenge_by_ids(data={}):
+def get_challenge_by_ids(data={}, challenge_collection=None):
     """Get challenges by the IDs provided;
         `_id` must be provided with a List value.
 
     Args:
         data (dict, optional): A dict object that consists of a key of '_id' and a list of IDs. Defaults to {}.
+        challenge_collection(Collection, optional): A MongoDB collection connection. Default to None
 
     Returns:
         JSON: JSON objects for all the challenges that are found.
@@ -42,7 +47,8 @@ def get_challenge_by_ids(data={}):
     if not ids:
         return Response("Bad Request", "A list of challenge IDs required").to_dict()
 
-    challenge_collection = db_connection.get_db_collection()
+    if not challenge_collection:
+        challenge_collection = db_connection.get_db_collection()
 
     challenges = challenge_collection.find({"_id": {'$in': ids}})
 
@@ -58,9 +64,13 @@ def get_challenge_by_ids(data={}):
         return Response("Not Found", { "Found": res, "Not Found": not_found }).to_dict()
 
 
-def add_challenge(data={}):
+def add_challenge(data={}, challenge_collection=None):
     """ Add a challenge into the database;
         Only 1 request body is required.
+
+    Args:
+        data(dict, optional): A body for challenge record. Default to {}
+        challenge_collection(Collection, optional): A MongoDB collection connection. Default to None
 
     Returns:
         JSON: JSON object of the response result
@@ -76,7 +86,8 @@ def add_challenge(data={}):
     else:
         challenge = challenge_data.to_dict()
         try:
-            challenge_collection = db_connection.get_db_collection()
+            if not challenge_collection:
+                challenge_collection = db_connection.get_db_collection()
 
             res = challenge_collection.insert_one(challenge)
             if res.inserted_id:
@@ -88,19 +99,17 @@ def add_challenge(data={}):
             return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
-def update_challenge_by_id(data={}):
+def update_challenge_by_id(data={}, challenge_collection=None):
     """Update a challenge by ID;
         Only 1 request body is required.
 
     Args:
-        id (string): A string that represents the ObjectID of the challenge. Defaults to empty string "".
+        data (dict, optional): A dict object of the updated challenge details; must include `_id`. Defaults to {}.
+        challenge_collection(Collection, optional): A MongoDB collection connection. Default to None
 
     Returns:
         JSON: JSON object of the response result
     """
-    if not data:
-        return Response("Bad Request", "Request body cannot be empty and a challenge ID is required").to_dict()
-    
     if not data or not data.get('_id'):
         return Response("Bad Request", "Request body and challenge ID is required").to_dict()
 
@@ -113,23 +122,25 @@ def update_challenge_by_id(data={}):
         challenge = challenge_data.to_dict()
         id = challenge.pop("_id")
         try:
-            challenge_collection = db_connection.get_db_collection()
-            
+            if not challenge_collection:
+                challenge_collection = db_connection.get_db_collection()
+                
             res = challenge_collection.find_one_and_update({"_id": id}, {'$set': challenge})
             if res:
                 return Response("Success", challenge).to_dict()
             else:
                 return Response("Not Found", "Challenge not found").to_dict()
         except errors.DuplicateKeyError as e:
-            return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
+            return Response("Bad Request", "Image name and version is duplicated!").to_dict()
 
 
-def delete_challenges_by_ids(data={}):
+def delete_challenges_by_ids(data={}, challenge_collection=None):
     """Delete all the challenges by ID; 
         `_id` must be provided with a List value.
 
     Args:
         data (dict, optional): A dict object that consists of a key of '_id' and a list of IDs. Defaults to {}.
+        challenge_collection(Collection, optional): A MongoDB collection connection. Default to None
 
     Returns:
         JSON: JSON object of the deleted records result
@@ -142,8 +153,9 @@ def delete_challenges_by_ids(data={}):
     if not ids:
         return Response("Bad Request", "A list of challenge IDs required").to_dict()
     
-    challenge_collection = db_connection.get_db_collection()
-    
+    if not challenge_collection:
+        challenge_collection = db_connection.get_db_collection()
+        
     challenges = challenge_collection.find()
     challenge_records = {}
 
@@ -166,8 +178,9 @@ def delete_challenges_by_ids(data={}):
     else:
         return Response("Internal Server Error", "Unable to delete all records").to_dict()
 
-def delete_all_challenges():
-    challenge_collection = db_connection.get_db_collection()
+def delete_all_challenges(challenge_collection=None):
+    if not challenge_collection:
+        challenge_collection = db_connection.get_db_collection()
 
     challenges = challenge_collection.find()
     res = {}
