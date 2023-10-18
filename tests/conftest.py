@@ -5,7 +5,7 @@ import pytest
 @pytest.fixture
 def client():
     client = mongomock.MongoClient()
-    db = client.cs302
+    db = client.cod
     challenge_collection = db['challenge']
 
     challenge_collection.create_index([
