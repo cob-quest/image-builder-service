@@ -6,6 +6,7 @@ from src.db import crud_functions
 @pytest.mark.dependency()
 def test_get_all_challenges(client):
     crud = crud_functions.CrudFunctions(client)
+    print(client == crud.challenge_collection)
     result = crud.get_all_challenges()
 
     assert result['message'] == 'Success'

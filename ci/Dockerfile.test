@@ -14,4 +14,3 @@ RUN pip install --no-cache-dir -r ./ci/requirements.test.txt
 
 # Specify the command to run your tests
 CMD ["python", "-m", "pytest"]
-
