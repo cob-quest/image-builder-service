@@ -1,25 +1,38 @@
 stages:
+  - Static Analysis
   - Test
   - Release
 
-unit-tests:
-    stage: Test
-    image: docker:24.0.2
-    services:
-        - docker:24.0.2-dind
-    before_script:
-        - docker info
-    script:
-        - docker compose -f ci/compose.test.yaml up --exit-code-from crud-pytest
+flake8:
+  stage: Static Analysis
+  image: python:3.11-slim
+  before_script:
+    - python -V
+    - python -m pip install flake8
+  script:
+    - flake8 src | tee flake8_report.txt
+  artifacts:
+    when: on_failure
+  paths:
+    - flake8_report.txt
 
-release-image:  
-  stage: Release  
+unit-tests:
+  stage: Test
   image: docker:24.0.2
- 
-  services:    
-    - docker:24.0.2-dind  
-  before_script:    
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY  
-  script:    
+  services:
+    - docker:24.0.2-dind
+  before_script:
+    - docker info
+  script:
+    - docker compose -f ci/compose.test.yaml up --exit-code-from crud-pytest
+
+release-image:
+  stage: Release
+  image: docker:24.0.2
+  services:
+    - docker:24.0.2-dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
     - docker build --pull -t "$CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA" -f Dockerfile .
     - docker push "$CI_REGISTRY_IMAGE/$CI_COMMIT_BRANCH:$CI_COMMIT_SHA"
