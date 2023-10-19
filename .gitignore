@@ -1,6 +1,4 @@
 *.pyc
-logs/
-*.log
 .env
 **/__pycache__
 image_to_build/*
