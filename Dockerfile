@@ -1,10 +1,10 @@
-FROM docker:stable-dind
+FROM docker:24.0.2-dind
 
 # Set up Python and Git
 RUN apk update && apk add --no-cache python3 python3-dev py3-pip git
 
 # Set symbolic link from python3 to python
-RUN ln -s /usr/bin/python3 /usr/bin/python
+# RUN ln -s /usr/bin/python3 /usr/bin/python
 
 # Update pip and clean up cache to reduce image size
 RUN pip3 install --upgrade pip
