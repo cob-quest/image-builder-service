@@ -1,5 +1,5 @@
 *.pyc
-.env
+*.env
 **/__pycache__
 image_to_build/*
 challenge-bucket-key.json
