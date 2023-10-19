@@ -1,10 +1,10 @@
 import pytest
-from src.db import crud_functions
 from tests.conftest import client
+from src.db import crud_functions
 
 
 @pytest.mark.dependency()
-def test_get_all_challenges():
+def test_get_all_challenges(client):
     crud = crud_functions.CrudFunctions(client)
     result = crud.get_all_challenges()
 
