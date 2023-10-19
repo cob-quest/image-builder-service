@@ -65,7 +65,6 @@ def custom_callback(ch, method, props, body):
     
     # Acknowledge upon successful
     else:
-        ch.basic_ack(delivery_tag=method.delivery_tag)
         status = "SUCCESS"
         logger.info("Image build COMPLETE!")
         
@@ -75,6 +74,9 @@ def custom_callback(ch, method, props, body):
         routing_key=FROM_SERVICE_ROUTING_KEY,
         body='''{"event": "Build image", "data": {"status": "%STATUS%"}}'''.replace('%STATUS%', status)
     )
+    
+    # Acknowledege message
+    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.basic_consume(
     queue=TO_SERVICE_QUEUE,

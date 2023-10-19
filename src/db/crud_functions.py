@@ -1,7 +1,12 @@
+import db.db_connection
+
+from pymongo import errors
 from models.Challenge import Challenge
 from models.Response import Response
-import db.db_connection as db_connection
-from pymongo import errors
+
+# Connect to the database
+CHALLENGE_COLLECTION = db.db_connection.get_db_collection()
+
 
 def get_all_challenges():
     """Get all challenges
@@ -9,9 +14,9 @@ def get_all_challenges():
     Returns:
         JSON: JSON objects for all the challenges that are created
     """
-    challenge_collection = db_connection.get_db_collection()
+    # challenge_collection = db_connection.get_db_collection()
 
-    records = challenge_collection.find()
+    records = CHALLENGE_COLLECTION.find()
     
     res = {}
     for record in records:
@@ -42,9 +47,9 @@ def get_challenge_by_ids(data={}):
     if not ids:
         return Response("Bad Request", "A list of challenge IDs required").to_dict()
 
-    challenge_collection = db_connection.get_db_collection()
+    # challenge_collection = db_connection.get_db_collection()
 
-    challenges = challenge_collection.find({"_id": {'$in': ids}})
+    challenges = CHALLENGE_COLLECTION.find({"_id": {'$in': ids}})
 
     res = {}
     for challenge in challenges:
@@ -56,6 +61,10 @@ def get_challenge_by_ids(data={}):
     else:
         not_found = [id for id in ids if id not in res]
         return Response("Not Found", { "Found": res, "Not Found": not_found }).to_dict()
+
+
+def get_challenge_by_name_ver_email(name, ver, email):
+    CHALLENGE_COLLECTION.find({})
 
 
 def add_challenge(data={}):
@@ -76,13 +85,14 @@ def add_challenge(data={}):
     else:
         challenge = challenge_data.to_dict()
         try:
-            challenge_collection = db_connection.get_db_collection()
+            # challenge_collection = db_connection.get_db_collection()
 
-            res = challenge_collection.insert_one(challenge)
+            res = CHALLENGE_COLLECTION.insert_one(challenge)
             if res.inserted_id:
                 return Response("Successfully created", challenge).to_dict()
             else:
                 return Response("Internal Server Error", "Data was not inserted properly into the database").to_dict()
+            
         except errors.DuplicateKeyError as e:
             print(e)
             return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
@@ -113,9 +123,9 @@ def update_challenge_by_id(data={}):
         challenge = challenge_data.to_dict()
         id = challenge.pop("_id")
         try:
-            challenge_collection = db_connection.get_db_collection()
+            # challenge_collection = db_connection.get_db_collection()
             
-            res = challenge_collection.find_one_and_update({"_id": id}, {'$set': challenge})
+            res = CHALLENGE_COLLECTION.find_one_and_update({"_id": id}, {'$set': challenge})
             if res:
                 return Response("Success", challenge).to_dict()
             else:
@@ -142,9 +152,9 @@ def delete_challenges_by_ids(data={}):
     if not ids:
         return Response("Bad Request", "A list of challenge IDs required").to_dict()
     
-    challenge_collection = db_connection.get_db_collection()
+    # challenge_collection = db_connection.get_db_collection()
     
-    challenges = challenge_collection.find()
+    challenges = CHALLENGE_COLLECTION.find()
     challenge_records = {}
 
     for challenge in challenges:
@@ -156,7 +166,7 @@ def delete_challenges_by_ids(data={}):
     # for challenge IDs that is found in DB, get the data that is deleted
     found = {id: challenge_records[id] for id in ids if id in challenge_records}
     
-    res = challenge_collection.delete_many({"_id": {"$in": ids}})
+    res = CHALLENGE_COLLECTION.delete_many({"_id": {"$in": ids}})
     if res.acknowledged:
         if res.deleted_count == len(ids):
             return Response("Success", found).to_dict()
@@ -167,16 +177,16 @@ def delete_challenges_by_ids(data={}):
         return Response("Internal Server Error", "Unable to delete all records").to_dict()
 
 def delete_all_challenges():
-    challenge_collection = db_connection.get_db_collection()
+    # challenge_collection = db_connection.get_db_collection()
 
-    challenges = challenge_collection.find()
+    challenges = CHALLENGE_COLLECTION.find()
     res = {}
 
     for challenge in challenges:
         id = challenge.pop("_id")
         res[id] = challenge
 
-    deleted = challenge_collection.delete_many({})
+    deleted = CHALLENGE_COLLECTION.delete_many({})
 
     if deleted.acknowledged:
         return Response("Success", res).to_dict()
