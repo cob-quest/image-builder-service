@@ -1,5 +1,16 @@
 stages:
+  - Test
   - Release
+
+unit-tests:
+    stage: Test
+    image: docker:24.0.2
+    services:
+        - docker:24.0.2-dind
+    before_script:
+        - docker info
+    script:
+        - docker compose -f ci/compose.test.yaml up --exit-code-from crud-pytest
 
 release-image:  
   stage: Release  
