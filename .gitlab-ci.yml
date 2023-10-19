@@ -13,8 +13,8 @@ flake8:
     - flake8 src | tee flake8_report.txt
   artifacts:
     when: on_failure
-  paths:
-    - flake8_report.txt
+    paths:
+      - flake8_report.txt
 
 unit-tests:
   stage: Test
