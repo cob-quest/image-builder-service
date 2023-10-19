@@ -189,8 +189,7 @@ def handle_message(message: dict) -> bool:
     try:
         id = build_image(message['image_name'], message['image_ver'])
         
-        # push_image(message['image_name'], message['image_ver'])
-        raise ImagePushFailedException()
+        push_image(message['image_name'], message['image_ver'])
 
         # Write to DB
         add_challenge(message)
