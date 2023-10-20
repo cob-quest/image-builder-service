@@ -192,7 +192,7 @@ def handle_message(message: dict) -> bool:
         push_image(message['image_name'], message['image_ver'])
 
         # Write to DB
-        add_challenge(message)
+        add_image(message)
         return True
     
     except ImageBuildFailedException as e:

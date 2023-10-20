@@ -1,7 +1,7 @@
 from bson import ObjectId
 from cerberus import Validator
 
-class Challenge:
+class Image:
     """ 
         Define schema to validate input to prevent invalid formats.
     """
@@ -27,7 +27,7 @@ class Challenge:
         }
     
     def validate(self):
-        validator = Validator(Challenge.schema)
+        validator = Validator(Image.schema)
         if not validator.validate(self.to_dict()):
             return False, validator.errors
         else:

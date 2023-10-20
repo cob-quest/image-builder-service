@@ -1,22 +1,22 @@
 from src.db import db_connection
 from pymongo import errors
-from src.models.Challenge import Challenge
+from src.models.Image import Image
 from src.models.Response import Response
 
 
 class CrudFunctions:
     def __init__(self, client=None):
-        self.challenge_collection = client if client else db_connection.get_collection()
+        self.image_collection = client if client else db_connection.get_collection()
         
 
-    def get_all_challenges(self):
-        """Get all challenges
+    def get_all_images(self):
+        """Get all images
 
         Returns:
-            JSON: JSON objects for all the challenges that are created
+            JSON: JSON objects for all the images that are created
         """
 
-        records = self.challenge_collection.find()
+        records = self.image_collection.find()
         
         res = {}
         for record in records:
@@ -29,31 +29,31 @@ class CrudFunctions:
             return Response("Internal Server Error", "Unable to read data").to_dict()
 
 
-    def get_challenge_by_ids(self, data={}):
-        """Get challenges by the IDs provided;
+    def get_image_by_ids(self, data={}):
+        """Get images by the IDs provided;
             `_id` must be provided with a List value.
 
         Args:
             data (dict, optional): A dict object that consists of a key of '_id' and a list of IDs. Defaults to {}.
 
         Returns:
-            JSON: JSON objects for all the challenges that are found.
+            JSON: JSON objects for all the images that are found.
         """
         if not data:
-            return Response("Bad Request", "Request body cannot be empty and challenges IDs are required").to_dict()
+            return Response("Bad Request", "Request body cannot be empty and images IDs are required").to_dict()
         
         ids = data.get("_id")
         
         if not ids:
-            return Response("Bad Request", "A list of challenge IDs required").to_dict()
+            return Response("Bad Request", "A list of images IDs required").to_dict()
 
 
-        challenges = self.challenge_collection.find({"_id": {'$in': ids}})
+        images = self.image_collection.find({"_id": {'$in': ids}})
 
         res = {}
-        for challenge in challenges:
-            challenge_id = challenge.pop("_id")
-            res[challenge_id] = challenge
+        for image in images:
+            image_id = image.pop("_id")
+            res[image_id] = image
         
         if len(res) == len(ids):
             return Response("Success", res).to_dict()
@@ -62,27 +62,27 @@ class CrudFunctions:
             return Response("Not Found", { "Found": res, "Not Found": not_found }).to_dict()
 
 
-    def add_challenge(self, data={}):
-        """ Add a challenge into the database;
+    def add_image(self, data={}):
+        """ Add a image into the database;
             Only 1 request body is required.
 
         Returns:
             JSON: JSON object of the response result
         """
         if not data:
-            return Response("Bad Request", "Request body cannot be empty and challenge body is required").to_dict()
+            return Response("Bad Request", "Request body cannot be empty and image body is required").to_dict()
 
-        challenge_data = Challenge(**data)
-        is_valid, err = challenge_data.validate()
+        image_data = Image(**data)
+        is_valid, err = image_data.validate()
 
         if not is_valid:
             return Response("Bad request", err).to_dict()
         else:
-            challenge = challenge_data.to_dict()
+            image = image_data.to_dict()
             try:
-                res = self.challenge_collection.insert_one(challenge)
+                res = self.image_collection.insert_one(image)
                 if res.inserted_id:
-                    return Response("Successfully created", challenge).to_dict()
+                    return Response("Successfully created", image).to_dict()
                 else:
                     return Response("Internal Server Error", "Data was not inserted properly into the database").to_dict()
                 
@@ -91,42 +91,42 @@ class CrudFunctions:
                 return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
-    def update_challenge_by_id(self, data={}):
-        """Update a challenge by ID;
+    def update_image_by_id(self, data={}):
+        """Update a image by ID;
             Only 1 request body is required.
 
         Args:
-            id (string): A string that represents the ObjectID of the challenge. Defaults to empty string "".
+            id (string): A string that represents the ObjectID of the image. Defaults to empty string "".
 
         Returns:
             JSON: JSON object of the response result
         """
         if not data:
-            return Response("Bad Request", "Request body cannot be empty and a challenge ID is required").to_dict()
+            return Response("Bad Request", "Request body cannot be empty and a image ID is required").to_dict()
         
         if not data or not data.get('_id'):
-            return Response("Bad Request", "Request body and challenge ID is required").to_dict()
+            return Response("Bad Request", "Request body and image ID is required").to_dict()
 
-        challenge_data = Challenge(**data)
-        is_valid, err = challenge_data.validate()
+        image_data = Image(**data)
+        is_valid, err = image_data.validate()
 
         if not is_valid:
             return Response("Bad Request", err).to_dict()
         else:
-            challenge = challenge_data.to_dict()
-            id = challenge.pop("_id")
+            image = image_data.to_dict()
+            id = image.pop("_id")
             try:
-                res = self.challenge_collection.find_one_and_update({"_id": id}, {'$set': challenge})
+                res = self.image_collection.find_one_and_update({"_id": id}, {'$set': image})
                 if res:
-                    return Response("Success", challenge).to_dict()
+                    return Response("Success", image).to_dict()
                 else:
-                    return Response("Not Found", "Challenge not found").to_dict()
+                    return Response("Not Found", "Image not found").to_dict()
             except errors.DuplicateKeyError as e:
                 return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
-    def delete_challenges_by_ids(self, data={}):
-        """Delete all the challenges by ID; 
+    def delete_images_by_ids(self, data={}):
+        """Delete all the images by ID; 
             `_id` must be provided with a List value.
 
         Args:
@@ -136,26 +136,26 @@ class CrudFunctions:
             JSON: JSON object of the deleted records result
         """
         if not data:
-            return Response("Bad Request", "Request body cannot be empty and challenge ID is required").to_dict()
+            return Response("Bad Request", "Request body cannot be empty and image ID is required").to_dict()
         
         ids = data.get("_id")
 
         if not ids:
-            return Response("Bad Request", "A list of challenge IDs required").to_dict()
+            return Response("Bad Request", "A list of image IDs required").to_dict()
         
-        challenges = self.challenge_collection.find()
-        challenge_records = {}
+        images = self.image_collection.find()
+        image_records = {}
 
-        for challenge in challenges:
-            id = challenge.pop("_id")
-            challenge_records[id] = challenge
+        for image in images:
+            id = image.pop("_id")
+            image_records[id] = image
 
-        # for challenge IDs not found in the DB
-        not_found = [id for id in ids if id not in challenge_records]
-        # for challenge IDs that is found in DB, get the data that is deleted
-        found = {id: challenge_records[id] for id in ids if id in challenge_records}
+        # for image IDs not found in the DB
+        not_found = [id for id in ids if id not in image_records]
+        # for image IDs that is found in DB, get the data that is deleted
+        found = {id: image_records[id] for id in ids if id in image_records}
         
-        res = self.challenge_collection.delete_many({"_id": {"$in": ids}})
+        res = self.image_collection.delete_many({"_id": {"$in": ids}})
         if res.acknowledged:
             if res.deleted_count == len(ids):
                 return Response("Success", found).to_dict()
@@ -165,15 +165,15 @@ class CrudFunctions:
         else:
             return Response("Internal Server Error", "Unable to delete all records").to_dict()
 
-    def delete_all_challenges(self):
-        challenges = self.challenge_collection.find()
+    def delete_all_images(self):
+        images = self.image_collection.find()
         res = {}
 
-        for challenge in challenges:
-            id = challenge.pop("_id")
-            res[id] = challenge
+        for image in images:
+            id = image.pop("_id")
+            res[id] = image
 
-        deleted = self.challenge_collection.delete_many({})
+        deleted = self.image_collection.delete_many({})
 
         if deleted.acknowledged:
             return Response("Success", res).to_dict()
