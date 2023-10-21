@@ -12,10 +12,7 @@ class Image:
         'image_name': {'type': 'string', 'required': True},
         'image_ver': {'type': 'string', 'required': True},
         'container_url': {'type': 'string', 'required': True},
-        's3path': {'type': 'string', 'required': True},
-        'timestamp': {'type': 'string', 'required': True},
-        'event': {'type': 'string', 'required': True},
-        'eventSuccess': {'type': 'boolean', 'required': True},
+        's3path': {'type': 'string', 'required': True}
     }
 
     def __init__(self, **kwargs):
