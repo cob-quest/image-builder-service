@@ -5,7 +5,7 @@ from logger import logger
 from dotenv import load_dotenv
 from pymongo import MongoClient, errors
 
-load_dotenv('./secrets/.env')
+load_dotenv('/app/secrets/.env')
 
 
 MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")

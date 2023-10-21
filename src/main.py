@@ -7,7 +7,7 @@ from image_build_util import handle_message
 from logger import logger
 
 # Get environment variables
-load_dotenv("./secrets/.env")
+load_dotenv("/app/secrets/.env")
 AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
 AMQP_PORT = 5672
 AMQP_USERNAME = os.getenv('AMQP_USERNAME')

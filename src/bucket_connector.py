@@ -4,7 +4,7 @@ from google.cloud import storage
 from dotenv import load_dotenv
 from logger import logger
 
-load_dotenv('./secrets/.env')
+load_dotenv('/app/secrets/.env')
 
 # Set up bucket parameters
 BUCKET_NAME = os.getenv("BUCKET_NAME")
