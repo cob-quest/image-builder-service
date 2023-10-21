@@ -7,8 +7,14 @@ from pymongo import MongoClient, errors
 
 load_dotenv('./secrets/.env')
 
-mongo_uri = os.getenv("MONGOURI")
-client = MongoClient(mongo_uri)
+
+MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")
+MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
+MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
+MONGODB_PORT = 27017
+
+MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+client = MongoClient(MONGOURI)
     
 def get_collection():
     """Get database connection

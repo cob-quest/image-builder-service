@@ -10,15 +10,15 @@ from db.crud_functions import CrudFunctions
 client = docker.from_env()
 
 # Retrieve container registry info from env
-GITLAB_REGISTRY = os.getenv("GITLAB_REGISTRY")
-GITLAB_USERNAME = os.getenv("GITLAB_USERNAME")
-GITLAB_PASSWORD = os.getenv("GITLAB_PASSWORD")
+GLREGISTRY = os.getenv("GLREGISTRY")
+GLUSERNAME = os.getenv("GLUSERNAME")
+GLTOKEN = os.getenv("GLTOKEN")
 
 # Login to Gitlab Container Registry
 client.login(
-    registry=GITLAB_REGISTRY,
-    username=GITLAB_USERNAME,
-    password=GITLAB_PASSWORD
+    registry=GLREGISTRY,
+    username=GLUSERNAME,
+    password=GLTOKEN
 )
 
 # Instantiate CRUD function instance
@@ -47,7 +47,7 @@ def push_image(name_tag: str) -> None:
 
     try:
         resp = client.images.push(
-            repository=f"{GITLAB_REGISTRY}/{name_tag}",
+            repository=f"{GLREGISTRY}/{name_tag}",
             stream=True
         )
         for line in resp:
@@ -76,7 +76,7 @@ def build_image(image_name: str, creator_name: str) -> str:
         image_built = client.images.build(
             path='./image_to_build/',
             dockerfile='Dockerfile',
-            tag=f"{GITLAB_REGISTRY}/{name_tag}",
+            tag=f"{GLREGISTRY}/{name_tag}",
             rm=True
         )
         logger.info(f"Image built SUCCESS | ID: {image_built[0].id}")

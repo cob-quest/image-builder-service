@@ -7,15 +7,18 @@ from image_build_util import handle_message
 from logger import logger
 
 # Get environment variables
-load_dotenv('./secrets/.env')
-MQ_HOSTNAME = os.getenv("MQ_HOSTNAME")
-MQ_PORT = os.getenv("MQ_PORT")
+load_dotenv("./secrets/.env")
+AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
+AMQP_PORT = 5672
+AMQP_USERNAME = os.getenv('AMQP_USERNAME')
+AMQP_PASSWORD = os.getenv('AMQP_PASSWORD')
+credentials = pika.PlainCredentials(AMQP_USERNAME, AMQP_PASSWORD)
 
 # Create a connection and channel
 retry_timer = 2
 while True:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(MQ_HOSTNAME, MQ_PORT))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=AMQP_HOSTNAME, port=AMQP_PORT,virtual_host='/',credentials=credentials))
         logger.info("Connected to Rabbit MQ SUCCESS!")
         break
     except:
