@@ -34,21 +34,19 @@ def get_collection():
             image_collection.create_index("corId", unique=True)
             
             # image_collection.insert_one({
-            #     "cor_id": "cor123",
-            #     "creator_name": "cs302",
-            #     "image_name": "first_image",
-            #     "image_ver": "1.0",
-            #     "container_url": "gitlab.com/first_image:1.0",
-            #     "s3path": "github.com/s3/test"
+            #     "corId": "cor123",
+            #     "creatorName": "cs302",
+            #     "imageName": "first_image",
+            #     "containerUrl": "gitlab.com/first_image:1.0",
+            #     "s3Path": "github.com/s3/test"
             # })
 
             # image_collection.insert_one({
-            #     "cor_id": "cor69",
-            #     "creator_name": "cs302",
-            #     "image_name": "second_image",
-            #     "image_ver": "1.0",
-            #     "container_url": "gitlab.com/first_image:1.0",
-            #     "s3path": "github.com/s3/test"
+            #     "corId": "cor69",
+            #     "creatorName": "cs302",
+            #     "imageName": "second_image",
+            #     "containerUrl": "gitlab.com/first_image:1.0",
+            #     "s3Path": "github.com/s3/test"
             # })
 
             logger.info("Connected to MongoDB SUCCESS!")
