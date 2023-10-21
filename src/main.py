@@ -18,7 +18,7 @@ credentials = pika.PlainCredentials(AMQP_USERNAME, AMQP_PASSWORD)
 retry_timer = 2
 while True:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=AMQP_HOSTNAME, port=AMQP_PORT,virtual_host='/',credentials=credentials))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host=AMQP_HOSTNAME, port=AMQP_PORT,virtual_host='/',credentials=credentials,heartbeat=1800))
         logger.info("Connected to Rabbit MQ SUCCESS!")
         break
     except:
@@ -60,6 +60,8 @@ channel.queue_bind(
 
 def custom_callback(ch, method, props, body):
     message_data = json.loads(body.decode('utf-8'))
+    # Acknowledege message
+    ch.basic_ack(delivery_tag=method.delivery_tag)
     
     # If message was not handled successfully
     if not handle_message(message_data):
@@ -83,8 +85,6 @@ def custom_callback(ch, method, props, body):
         body='{' + response_body + '}'
     )
     
-    # Acknowledege message
-    ch.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.basic_consume(
     queue=TO_SERVICE_QUEUE,

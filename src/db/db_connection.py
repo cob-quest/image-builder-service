@@ -1,9 +1,8 @@
 import os, time
-import pymongo
 
 from logger import logger
 from dotenv import load_dotenv
-from pymongo import MongoClient, errors
+from pymongo import MongoClient, errors, IndexModel, ASCENDING, DESCENDING
 
 load_dotenv('/app/secrets/.env')
 
@@ -32,7 +31,8 @@ def get_collection():
             image_collection = db['image_builder']
 
             # No duplcation of 'image_name' and 'image_ver' field
-            image_collection.create_index("corId", unique=True)
+            # index = IndexModel([("corId",ASCENDING)])
+            image_collection.create_index([("corId",ASCENDING)], unique=True)
             
             # image_collection.insert_one({
             #     "corId": "cor123",
