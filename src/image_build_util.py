@@ -1,10 +1,10 @@
 import docker
+import string, random
 import zipfile, subprocess, os, time
 
-from git import Repo
 from logger import logger
 from bucket_connector import download_from_bucket
-from db.crud_functions import *
+from db.crud_functions import CrudFunctions
 
 # Connect to docker using default socket
 client = docker.from_env()
@@ -21,25 +21,33 @@ client.login(
     password=GITLAB_PASSWORD
 )
 
+# Instantiate CRUD function instance
+DB = CrudFunctions()
+
 class ImageBuildFailedException(Exception):
     ...
 
 class ImagePushFailedException(Exception):
     ...
 
-def push_image(image_name: str, image_version: str) -> None:
+def create_name_tag(image_name: str, creator_name: str) -> str:
+    creator_name = creator_name.lower().replace(' ', '-')
+    random_tag = ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(4)])
+    return f"{image_name}:{creator_name}-{random_tag}"
+
+def push_image(name_tag: str) -> None:
     '''
     Push docker image to Gitlab Container Registry
     
-    Args: ``image_name``(str) and ``image_version``(str) as tag to the image
+    Args: ``name_tag``(str) of the previously built image
 
     Returns: None
     '''
-    logger.info(f"Pushing image {image_name}:{image_version} to Gitlab Container Registry")
+    logger.info(f"Pushing image {name_tag} to Gitlab Container Registry")
 
     try:
         resp = client.images.push(
-            repository=f"{GITLAB_REGISTRY}/{image_name}:{image_version}",
+            repository=f"{GITLAB_REGISTRY}/{name_tag}",
             stream=True
         )
         for line in resp:
@@ -51,26 +59,28 @@ def push_image(image_name: str, image_version: str) -> None:
         raise ImagePushFailedException(str(e))
 
 
-def build_image(image_name: str, image_version: str) -> str:
+def build_image(image_name: str, creator_name: str) -> str:
     '''
     From the Dockerfile in image_to_build directory, build a docker image\n
 
-    Args: ``image_name``(str) and ``image_version``(str) as tag to the image
+    Args: ``image_name``(str) and ``creator_name``(str) as tag to the image
 
     Returns: ``id``(str)
     '''
+    
+    name_tag = create_name_tag(image_name, creator_name)
 
-    logger.info(f"Building image {image_name}:{image_version} from Dockerfile...")
+    logger.info(f"Building image {name_tag} from Dockerfile...")
 
     try:
         image_built = client.images.build(
             path='./image_to_build/',
             dockerfile='Dockerfile',
-            tag=f"{GITLAB_REGISTRY}/{image_name}:{image_version}",
+            tag=f"{GITLAB_REGISTRY}/{name_tag}",
             rm=True
         )
         logger.info(f"Image built SUCCESS | ID: {image_built[0].id}")
-        return image_built[0].id
+        return image_built[0].id, name_tag
 
     except Exception as e:
         raise ImageBuildFailedException(str(e))
@@ -106,57 +116,40 @@ def remove_image(image_id: str) -> None:
             retry_timer += 2
 
 
-def extract_from_zip(zip_filename: str) -> None:
+def extract_from_zip(filename: str) -> None:
     '''
     Extracts the contents of a zip file into the iamge_to_build directory\n
 
-    Args: ``zip_filename``(str)
+    Args: ``filename``(str)
 
     Returns: ``None``
     '''
 
     logger.info("Extracting zip file containing Dockerfile...")
+    
+    base_filename = filename.split("/")[-1]
 
     try:
-        with zipfile.ZipFile(f'./image_to_build/{zip_filename}', 'r') as zf:
+        with zipfile.ZipFile(f'./image_to_build/{base_filename}', 'r') as zf:
             zf.extractall('./image_to_build/')
-        logger.info(f"'{zip_filename}' extracted into image_to_build directory")
+        logger.info(f"'{base_filename}' extracted into image_to_build directory")
 
     except:
-        logger.error(f"'{zip_filename}' not found in image_to_build directory")
-        raise
-
-
-def clone_from_git(git_link: str) -> None:
-    '''(NOTE) This function is not for production use'''
-
-    try:
-        GITHUB_USERNAME = os.getenv("GITHUB_USERNAME")
-        GITHUB_PAT = os.getenv("GITHUB_PAT")
-        repo_url = f"https://{GITHUB_USERNAME}:{GITHUB_PAT}@{git_link.split('@')[1]}"
-        repo = Repo.clone_from(repo_url, './image_to_build')
-        logger.info(f"Cloned repo from Git | {repo}")
-
-    except Exception as e:
-        logger.error(e)
+        logger.error(f"'{base_filename}' not found in image_to_build directory")
         raise
 
 
 def set_up_image_to_build(message: dict) -> bool:
     
     # Check for invalid message type
-    if message['type'] not in ['ZIP', 'GIT']:
-        logger.error(f'Invalid message type of {message["type"]}, should be of value "ZIP" or "GIT')
+    if not message.get('fullPath', None):
+        logger.error(f'Please specify full path to file to be downloaded!')
         return False
 
     # Depending on message, type, download files from S3 or clone from git
     try:
-        if message['type'] == 'ZIP':
-            download_from_bucket(message['filename'])
-            extract_from_zip(message['filename'])
-
-        elif message['type'] == 'GIT':
-            clone_from_git(message['link'])
+        download_from_bucket(message['fullPath'])
+        extract_from_zip(message['fullPath'])
         return True
 
     except:
@@ -187,12 +180,15 @@ def handle_message(message: dict) -> bool:
         return False
 
     try:
-        id = build_image(message['image_name'], message['image_ver'])
+        id, name_tag = build_image(
+            message['imageName'], 
+            message['creatorName']
+        )
         
-        push_image(message['image_name'], message['image_ver'])
+        push_image(name_tag)
 
         # Write to DB
-        add_image(message)
+        DB.add_image(message)
         return True
     
     except ImageBuildFailedException as e:

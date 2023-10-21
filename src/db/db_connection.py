@@ -1,11 +1,11 @@
 import os, time
 import pymongo
 
-from src.logger import logger
+from logger import logger
 from dotenv import load_dotenv
 from pymongo import MongoClient, errors
 
-load_dotenv()
+load_dotenv('./secrets/.env')
 
 mongo_uri = os.getenv("MONGOURI")
 client = MongoClient(mongo_uri)
@@ -22,7 +22,7 @@ def get_collection():
         try:
             logger.info("Connecting to MongoDB...")
             db = client.get_database()
-            image_collection = db['image']
+            image_collection = db['image_builder']
 
             # No duplcation of 'image_name' and 'image_ver' field
             image_collection.create_index("cor_id", unique=True)

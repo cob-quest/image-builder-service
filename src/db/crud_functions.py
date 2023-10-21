@@ -1,7 +1,7 @@
-from src.db import db_connection
+from db import db_connection
 from pymongo import errors
-from src.models.Image import Image
-from src.models.Response import Response
+from models.Image import Image
+from models.Response import Response
 
 
 class CrudFunctions:
