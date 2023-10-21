@@ -37,7 +37,6 @@ def get_collection():
                 "cor_id": "cor123",
                 "creator_name": "cs302",
                 "image_name": "first_image",
-                "image_ver": "1.0",
                 "container_url": "gitlab.com/first_image:1.0",
                 "s3path": "github.com/s3/test"
             })
@@ -46,7 +45,6 @@ def get_collection():
                 "cor_id": "cor69",
                 "creator_name": "cs302",
                 "image_name": "second_image",
-                "image_ver": "1.0",
                 "container_url": "gitlab.com/first_image:1.0",
                 "s3path": "github.com/s3/test"
             })

@@ -10,7 +10,6 @@ class Image:
         'cor_id': {'type': 'string', 'required': True},
         'creator_name': {'type': 'string', 'required': True},
         'image_name': {'type': 'string', 'required': True},
-        'image_ver': {'type': 'string', 'required': True},
         'container_url': {'type': 'string', 'required': True},
         's3path': {'type': 'string', 'required': True}
     }
@@ -20,7 +19,6 @@ class Image:
         self.cor_id = kwargs.get('cor_id')
         self.creator_name = kwargs.get('creator_name')
         self.image_name = kwargs.get('image_name')
-        self.image_ver = kwargs.get('image_ver')
         self.container_url = kwargs.get('container_url')
         self.s3path = kwargs.get('s3path')
 
@@ -30,7 +28,6 @@ class Image:
             "cor_id": self.cor_id,
             "creator_name": self.creator_name,
             "image_name": self.image_name,
-            "image_ver": self.image_ver,
             "container_url": self.container_url,
             "s3path": self.s3path,
         }
