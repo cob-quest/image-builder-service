@@ -52,9 +52,9 @@ def build_image(image_name: str, creator_name: str) -> None:
             destination=f"{GLREGISTRY}/{name_tag}",
             dockerfile='./image_to_build/Dockerfile',
             context="/usr/image_builder/image_to_build",
-            snapshot_mode=KanikoSnapshotMode.full
+            snapshot_mode=KanikoSnapshotMode.time
         )
-        
+        logger.info("Image built! Function finished running")
         return name_tag
 
     except Exception as e:
@@ -129,9 +129,12 @@ def handle_message(message: dict) -> bool:
             message['imageName'], 
             message['creatorName']
         )
+        
+        image_registry_link = f"{GLREGISTRY}/{name_tag}"
+        message['imageRegistryLink'] = image_registry_link
 
         # Write to DB
-        # DB.add_image(message)
+        DB.add_image(message)
         return True
     
     except ImageBuildFailedException as e:

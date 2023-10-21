@@ -3,7 +3,7 @@
         "corId": "DUMMY_COR_ID",
         "imageName": "my-new-img",
         "creatorName": "johnny",
-        "s3Path": "DUMMY_S3_path"
+        "s3Path": "challenge-zips/testing.zip"
     },
 
     {

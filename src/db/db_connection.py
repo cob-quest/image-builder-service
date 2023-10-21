@@ -9,14 +9,11 @@ load_dotenv('./secrets/.env')
 
 
 MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")
-# if os.getenv("ENVIRONMENT") ==  "DEV":
-#     MONGODB_HOSTNAME = "mongo"
 MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
 MONGODB_PORT = 27017
 
-# MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
-MONGOURI = "mongodb://10.124.14.153:27017/cob"
+MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
 client = MongoClient(MONGOURI)
     
 def get_collection():
@@ -34,7 +31,7 @@ def get_collection():
             image_collection = db['image_builder']
 
             # No duplcation of 'image_name' and 'image_ver' field
-            image_collection.create_index("cor_id", unique=True)
+            image_collection.create_index("corId", unique=True)
             
             # image_collection.insert_one({
             #     "cor_id": "cor123",

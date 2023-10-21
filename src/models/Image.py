@@ -7,29 +7,29 @@ class Image:
     """
     schema = {
         '_id': {'type': 'string'},
-        'cor_id': {'type': 'string', 'required': True},
-        'creator_name': {'type': 'string', 'required': True},
-        'image_name': {'type': 'string', 'required': True},
-        'container_url': {'type': 'string', 'required': True},
-        's3path': {'type': 'string', 'required': True}
+        'corId': {'type': 'string', 'required': True},
+        'creatorName': {'type': 'string', 'required': True},
+        'imageName': {'type': 'string', 'required': True},
+        'imageRegistryLink': {'type': 'string', 'required': True},
+        's3Path': {'type': 'string', 'required': True}
     }
 
     def __init__(self, **kwargs):
         self._id = ObjectId(kwargs.get('_id'))
-        self.cor_id = kwargs.get('cor_id')
-        self.creator_name = kwargs.get('creator_name')
-        self.image_name = kwargs.get('image_name')
-        self.container_url = kwargs.get('container_url')
-        self.s3path = kwargs.get('s3path')
+        self.corId = kwargs.get('corId')
+        self.creatorName = kwargs.get('creatorName')
+        self.imageName = kwargs.get('imageName')
+        self.imageRegistryLink = kwargs.get('imageRegistryLink')
+        self.s3Path = kwargs.get('s3Path')
 
     def to_dict(self):
         return {
             "_id": str(self._id),
-            "cor_id": self.cor_id,
-            "creator_name": self.creator_name,
-            "image_name": self.image_name,
-            "container_url": self.container_url,
-            "s3path": self.s3path,
+            "corId": self.corId,
+            "creatorName": self.creatorName,
+            "imageName": self.imageName,
+            "imageRegistryLink": self.imageRegistryLink,
+            "s3Path": self.s3Path,
         }
     
     def validate(self):
