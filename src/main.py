@@ -7,7 +7,7 @@ from image_build_util import handle_message
 from logger import logger
 
 # Get environment variables
-load_dotenv()
+load_dotenv('./secrets/.env')
 MQ_HOSTNAME = os.getenv("MQ_HOSTNAME")
 MQ_PORT = os.getenv("MQ_PORT")
 
@@ -32,7 +32,7 @@ BUILDER_EXCHANGE = 'topic.imageBuilder'
 
 # Routing keys
 TO_SERVICE_ROUTING_KEY = 'imageBuilder.toService.*'
-FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.*'
+FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.imageBuilt'
 
 # Declare queue
 channel.queue_declare(
