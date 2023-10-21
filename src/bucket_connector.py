@@ -8,7 +8,8 @@ load_dotenv('./secrets/.env')
 
 # Set up bucket parameters
 BUCKET_NAME = os.getenv("BUCKET_NAME")
-client = storage.Client.from_service_account_json("/app/secrets/challenge-bucket-key.json")
+BUCKET_CREDS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+client = storage.Client.from_service_account_json(BUCKET_CREDS)
 bucket = client.bucket(BUCKET_NAME)
 
 def upload_to_bucket(filename: str) -> None:
