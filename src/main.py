@@ -8,10 +8,13 @@ from logger import logger
 
 # Get environment variables
 load_dotenv("./secrets/.env")
-AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
+# AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
+AMQP_HOSTNAME = "10.124.14.153"
 AMQP_PORT = 5672
-AMQP_USERNAME = os.getenv('AMQP_USERNAME')
-AMQP_PASSWORD = os.getenv('AMQP_PASSWORD')
+# AMQP_USERNAME = os.getenv('AMQP_USERNAME')
+# AMQP_PASSWORD = os.getenv('AMQP_PASSWORD')
+AMQP_USERNAME = "guest"
+AMQP_PASSWORD = "guest"
 credentials = pika.PlainCredentials(AMQP_USERNAME, AMQP_PASSWORD)
 
 # Create a connection and channel

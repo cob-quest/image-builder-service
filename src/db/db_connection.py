@@ -9,11 +9,14 @@ load_dotenv('./secrets/.env')
 
 
 MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")
+# if os.getenv("ENVIRONMENT") ==  "DEV":
+#     MONGODB_HOSTNAME = "mongo"
 MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
 MONGODB_PORT = 27017
 
-MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+# MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+MONGOURI = "mongodb://10.124.14.153:27017/cob"
 client = MongoClient(MONGOURI)
     
 def get_collection():
@@ -33,21 +36,23 @@ def get_collection():
             # No duplcation of 'image_name' and 'image_ver' field
             image_collection.create_index("cor_id", unique=True)
             
-            image_collection.insert_one({
-                "cor_id": "cor123",
-                "creator_name": "cs302",
-                "image_name": "first_image",
-                "container_url": "gitlab.com/first_image:1.0",
-                "s3path": "github.com/s3/test"
-            })
+            # image_collection.insert_one({
+            #     "cor_id": "cor123",
+            #     "creator_name": "cs302",
+            #     "image_name": "first_image",
+            #     "image_ver": "1.0",
+            #     "container_url": "gitlab.com/first_image:1.0",
+            #     "s3path": "github.com/s3/test"
+            # })
 
-            image_collection.insert_one({
-                "cor_id": "cor69",
-                "creator_name": "cs302",
-                "image_name": "second_image",
-                "container_url": "gitlab.com/first_image:1.0",
-                "s3path": "github.com/s3/test"
-            })
+            # image_collection.insert_one({
+            #     "cor_id": "cor69",
+            #     "creator_name": "cs302",
+            #     "image_name": "second_image",
+            #     "image_ver": "1.0",
+            #     "container_url": "gitlab.com/first_image:1.0",
+            #     "s3path": "github.com/s3/test"
+            # })
 
             logger.info("Connected to MongoDB SUCCESS!")
             return image_collection

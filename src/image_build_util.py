@@ -2,12 +2,16 @@ import docker
 import string, random
 import zipfile, subprocess, os, time
 
+from kaniko import Kaniko, KanikoSnapshotMode
 from logger import logger
 from bucket_connector import download_from_bucket
 from db.crud_functions import CrudFunctions
 
 # Connect to docker using default socket
 client = docker.from_env()
+
+# Create Kaniko instance
+kaniko = Kaniko()
 
 # Retrieve container registry info from env
 GLREGISTRY = os.getenv("GLREGISTRY")
@@ -73,14 +77,32 @@ def build_image(image_name: str, creator_name: str) -> str:
     logger.info(f"Building image {name_tag} from Dockerfile...")
 
     try:
-        image_built = client.images.build(
-            path='./image_to_build/',
-            dockerfile='Dockerfile',
-            tag=f"{GLREGISTRY}/{name_tag}",
-            rm=True
+        # image_built = client.images.build(
+        #     path='./image_to_build/',
+        #     dockerfile='Dockerfile',
+        #     tag=f"{GLREGISTRY}/{name_tag}",
+        #     rm=True
+        # )
+        # logger.info(f"Image built SUCCESS | ID: {image_built[0].id}")
+        # return image_built[0].id, name_tag
+
+        kaniko.force = True
+        # kaniko.docker_registry_uri = "registry.gitlab.com/"
+        logger.info(f"KANIKO REG URI: {kaniko.docker_registry_uri}")
+        # kaniko.destinatino = f"registry.gitlab.com/cs302-2023/g3-team8/project/image-builder-service/{name_tag}"
+
+
+        build_logs = kaniko.build(
+            docker_registry_uri=GLREGISTRY,
+            registry_username=GLUSERNAME,
+            registry_password=GLTOKEN,
+            destination=f"{GLREGISTRY}/{name_tag}",
+            dockerfile='./image_to_build/Dockerfile',
+            context="/usr/image_builder/image_to_build",
+            snapshot_mode=KanikoSnapshotMode.full
         )
-        logger.info(f"Image built SUCCESS | ID: {image_built[0].id}")
-        return image_built[0].id, name_tag
+
+        logger.info(build_logs)
 
     except Exception as e:
         raise ImageBuildFailedException(str(e))
@@ -185,7 +207,7 @@ def handle_message(message: dict) -> bool:
             message['creatorName']
         )
         
-        push_image(name_tag)
+        # push_image(name_tag)
 
         # Write to DB
         DB.add_image(message)
