@@ -14,6 +14,7 @@ MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
 MONGODB_PORT = 27017
 
 MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+logger.info(MONGOURI)
 client = MongoClient(MONGOURI)
     
 def get_collection():
@@ -27,7 +28,7 @@ def get_collection():
     while True:
         try:
             logger.info("Connecting to MongoDB...")
-            db = client.get_database()
+            db = client.get_database("cob")
             image_collection = db['image_builder']
 
             # No duplcation of 'image_name' and 'image_ver' field
