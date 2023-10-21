@@ -1,4 +1,3 @@
-import docker
 import string, random
 import zipfile, subprocess, os, time
 
@@ -7,9 +6,6 @@ from logger import logger
 from bucket_connector import download_from_bucket
 from db.crud_functions import CrudFunctions
 
-# Connect to docker using default socket
-client = docker.from_env()
-
 # Create Kaniko instance
 kaniko = Kaniko()
 
@@ -17,13 +13,6 @@ kaniko = Kaniko()
 GLREGISTRY = os.getenv("GLREGISTRY")
 GLUSERNAME = os.getenv("GLUSERNAME")
 GLTOKEN = os.getenv("GLTOKEN")
-
-# Login to Gitlab Container Registry
-client.login(
-    registry=GLREGISTRY,
-    username=GLUSERNAME,
-    password=GLTOKEN
-)
 
 # Instantiate CRUD function instance
 DB = CrudFunctions()
@@ -39,31 +28,8 @@ def create_name_tag(image_name: str, creator_name: str) -> str:
     random_tag = ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(4)])
     return f"{image_name}:{creator_name}-{random_tag}"
 
-def push_image(name_tag: str) -> None:
-    '''
-    Push docker image to Gitlab Container Registry
-    
-    Args: ``name_tag``(str) of the previously built image
 
-    Returns: None
-    '''
-    logger.info(f"Pushing image {name_tag} to Gitlab Container Registry")
-
-    try:
-        resp = client.images.push(
-            repository=f"{GLREGISTRY}/{name_tag}",
-            stream=True
-        )
-        for line in resp:
-            logger.debug(line)
-
-        logger.info(f"Image pushed SUCCESS!")
-
-    except Exception as e:
-        raise ImagePushFailedException(str(e))
-
-
-def build_image(image_name: str, creator_name: str) -> str:
+def build_image(image_name: str, creator_name: str) -> None:
     '''
     From the Dockerfile in image_to_build directory, build a docker image\n
 
@@ -77,65 +43,22 @@ def build_image(image_name: str, creator_name: str) -> str:
     logger.info(f"Building image {name_tag} from Dockerfile...")
 
     try:
-        # image_built = client.images.build(
-        #     path='./image_to_build/',
-        #     dockerfile='Dockerfile',
-        #     tag=f"{GLREGISTRY}/{name_tag}",
-        #     rm=True
-        # )
-        # logger.info(f"Image built SUCCESS | ID: {image_built[0].id}")
-        # return image_built[0].id, name_tag
-
         kaniko.force = True
-        # kaniko.docker_registry_uri = "registry.gitlab.com/"
-        logger.info(f"KANIKO REG URI: {kaniko.docker_registry_uri}")
-        # kaniko.destinatino = f"registry.gitlab.com/cs302-2023/g3-team8/project/image-builder-service/{name_tag}"
 
-
-        build_logs = kaniko.build(
+        kaniko.build(
             docker_registry_uri=GLREGISTRY,
             registry_username=GLUSERNAME,
             registry_password=GLTOKEN,
             destination=f"{GLREGISTRY}/{name_tag}",
             dockerfile='./image_to_build/Dockerfile',
             context="/usr/image_builder/image_to_build",
-            snapshot_mode=KanikoSnapshotMode.full
+            snapshot_mode=KanikoSnapshotMode.time
         )
-
-        logger.info(build_logs)
+        logger.info("Image built! Function finished running")
+        return name_tag
 
     except Exception as e:
         raise ImageBuildFailedException(str(e))
-
-
-def remove_image(image_id: str) -> None:
-    '''
-    This will be used upon the failure of pushing an image to registry.
-    This is done for error handling, to remove the image.
-    
-    Args: ``image_id``(str)
-    
-    Returns: None
-    '''
-
-    retry_timer = 2
-
-    while True:
-        try:
-            logger.info(f"Removing image: {image_id}")
-            client.images.remove(image_id, force=True)
-            logger.info(f"Remove image ({image_id}) SUCCESS!")
-            return
-            
-        except docker.errors.ImageNotFound:
-            logger.error(f"Image {image_id} not found.")
-            return
-            
-        except docker.errors.APIError as e:
-            logger.error(f"Error: {e}")
-            logger.error(f"Removing image failed... Retrying in {retry_timer} seconds")
-            time.sleep(retry_timer)
-            retry_timer += 2
 
 
 def extract_from_zip(filename: str) -> None:
@@ -164,14 +87,14 @@ def extract_from_zip(filename: str) -> None:
 def set_up_image_to_build(message: dict) -> bool:
     
     # Check for invalid message type
-    if not message.get('fullPath', None):
-        logger.error(f'Please specify full path to file to be downloaded!')
+    if not message.get('s3Path', None):
+        logger.error(f'Please specify s3 path for file to be downloaded!')
         return False
 
     # Depending on message, type, download files from S3 or clone from git
     try:
-        download_from_bucket(message['fullPath'])
-        extract_from_zip(message['fullPath'])
+        download_from_bucket(message['s3Path'])
+        extract_from_zip(message['s3Path'])
         return True
 
     except:
@@ -202,22 +125,19 @@ def handle_message(message: dict) -> bool:
         return False
 
     try:
-        id, name_tag = build_image(
+        name_tag = build_image(
             message['imageName'], 
             message['creatorName']
         )
         
-        # push_image(name_tag)
+        image_registry_link = f"{GLREGISTRY}/{name_tag}"
+        message['imageRegistryLink'] = image_registry_link
 
         # Write to DB
         DB.add_image(message)
         return True
     
     except ImageBuildFailedException as e:
-        logger.error(e)
-        
-    except ImagePushFailedException as e:
-        remove_image(id)
         logger.error(e)
 
     except Exception as e:

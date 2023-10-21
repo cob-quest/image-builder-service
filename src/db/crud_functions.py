@@ -2,6 +2,7 @@ from db import db_connection
 from pymongo import errors
 from models.Image import Image
 from models.Response import Response
+from logger import logger
 
 
 class CrudFunctions:
@@ -77,18 +78,21 @@ class CrudFunctions:
 
         if not is_valid:
             return Response("Bad request", err).to_dict()
-        else:
-            image = image_data.to_dict()
-            try:
-                res = self.image_collection.insert_one(image)
-                if res.inserted_id:
-                    return Response("Successfully created", image).to_dict()
-                else:
-                    return Response("Internal Server Error", "Data was not inserted properly into the database").to_dict()
-                
-            except errors.DuplicateKeyError as e:
-                print(e)
-                return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
+        
+        image = image_data.to_dict()
+        try:
+            res = self.image_collection.insert_one(image)
+            
+            logger.info(f"{data['corId']} Written to DB")
+            
+            if res.inserted_id:
+                return Response("Successfully created", image).to_dict()
+            else:
+                return Response("Internal Server Error", "Data was not inserted properly into the database").to_dict()
+            
+        except errors.DuplicateKeyError as e:
+            logger.error(e)
+            return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
 
 
     def update_image_by_id(self, data={}):

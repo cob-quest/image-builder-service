@@ -8,13 +8,10 @@ from logger import logger
 
 # Get environment variables
 load_dotenv("./secrets/.env")
-# AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
-AMQP_HOSTNAME = "10.124.14.153"
+AMQP_HOSTNAME = os.getenv("AMQP_HOSTNAME")
 AMQP_PORT = 5672
-# AMQP_USERNAME = os.getenv('AMQP_USERNAME')
-# AMQP_PASSWORD = os.getenv('AMQP_PASSWORD')
-AMQP_USERNAME = "guest"
-AMQP_PASSWORD = "guest"
+AMQP_USERNAME = os.getenv('AMQP_USERNAME')
+AMQP_PASSWORD = os.getenv('AMQP_PASSWORD')
 credentials = pika.PlainCredentials(AMQP_USERNAME, AMQP_PASSWORD)
 
 # Create a connection and channel
@@ -73,12 +70,17 @@ def custom_callback(ch, method, props, body):
     else:
         status = "SUCCESS"
         logger.info("Image build COMPLETE!")
+    
+    logger.info("===============================")
         
     # Respond to process engine through fromService queue
+    corId = 'corId'
+    response_body = f'"corId": "{message_data[corId]}", "buildStatus": "{status}"'
+    
     channel.basic_publish(
         exchange=BUILDER_EXCHANGE,
         routing_key=FROM_SERVICE_ROUTING_KEY,
-        body='''{"event": "Build image", "data": {"status": "%STATUS%"}}'''.replace('%STATUS%', status)
+        body='{' + response_body + '}'
     )
     
     # Acknowledege message

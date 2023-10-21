@@ -9,14 +9,11 @@ load_dotenv('./secrets/.env')
 
 
 MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")
-# if os.getenv("ENVIRONMENT") ==  "DEV":
-#     MONGODB_HOSTNAME = "mongo"
 MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
 MONGODB_PORT = 27017
 
-# MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
-MONGOURI = "mongodb://10.124.14.153:27017/cob"
+MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
 client = MongoClient(MONGOURI)
     
 def get_collection():

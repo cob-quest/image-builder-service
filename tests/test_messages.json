@@ -1,0 +1,13 @@
+[
+    {
+        "corId": "DUMMY_COR_ID",
+        "imageName": "my-new-img",
+        "creatorName": "johnny",
+        "s3Path": "challenge-zips/testing.zip"
+    },
+
+    {
+        "corID": "DUMMY_COR_ID",
+        "buildStatus": "SUCCESS/FAILURE"
+    }
+]
