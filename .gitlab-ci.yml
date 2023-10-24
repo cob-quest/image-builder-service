@@ -2,6 +2,33 @@ stages:
   - Test
   - Release
 
+flake8:
+  stage: Test
+  image: python:3.11-slim
+  before_script:
+    - python -V
+    - python -m pip install flake8
+  script:
+    - flake8 src | tee flake8_report.txt
+  artifacts:
+    when: on_failure
+    paths:
+      - flake8_report.txt
+
+pylint:
+  stage: Test
+  image: python:3.11-slim
+  before_script:
+    - python -V
+    - python -m pip install -r requirements.txt
+    - python -m pip install pylint
+  script:
+    - pylint --fail-under=7 src | tee pylint_report.txt
+  artifacts:
+    when: always
+    paths:
+      - pylint_report.txt
+
 # unit-tests:
 #   stage: Test
 #   image: docker:24.0.2
