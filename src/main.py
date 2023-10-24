@@ -1,6 +1,7 @@
 import pika
 import json
-import os, time
+import os
+import time
 
 from dotenv import load_dotenv
 from image_build_util import handle_message
@@ -18,11 +19,13 @@ credentials = pika.PlainCredentials(AMQP_USERNAME, AMQP_PASSWORD)
 retry_timer = 2
 while True:
     try:
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host=AMQP_HOSTNAME, port=AMQP_PORT,virtual_host='/',credentials=credentials,heartbeat=1800))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(
+            host=AMQP_HOSTNAME, port=AMQP_PORT, virtual_host='/', credentials=credentials, heartbeat=1800))
         logger.info("Connected to Rabbit MQ SUCCESS!")
         break
     except:
-        logger.info(f"Connecting to RabbitMQ Failed... Retrying in {retry_timer} seconds")
+        logger.info(
+            f"Connecting to RabbitMQ Failed... Retrying in {retry_timer} seconds")
         time.sleep(retry_timer)
         retry_timer += 2
 
@@ -35,7 +38,7 @@ BUILDER_EXCHANGE = 'topic.imageBuilder'
 
 # Routing keys
 TO_SERVICE_ROUTING_KEY = 'imageBuilder.toService.*'
-FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.imageBuilt'
+FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.imageBuild'
 
 # Declare queue
 channel.queue_declare(
@@ -62,29 +65,29 @@ def custom_callback(ch, method, props, body):
     message_data = json.loads(body.decode('utf-8'))
     # Acknowledege message
     ch.basic_ack(delivery_tag=method.delivery_tag)
-    
+
     # If message was not handled successfully
     if not handle_message(message_data):
         status = "FAIL"
         logger.error("Image build FAILED!")
-    
+
     # Acknowledge upon successful
     else:
         status = "SUCCESS"
         logger.info("Image build COMPLETE!")
-    
+
     logger.info("===============================")
-        
+
     # Respond to process engine through fromService queue
     corId = 'corId'
     response_body = f'"corId": "{message_data[corId]}", "buildStatus": "{status}"'
-    
+
     channel.basic_publish(
         exchange=BUILDER_EXCHANGE,
         routing_key=FROM_SERVICE_ROUTING_KEY,
         body='{' + response_body + '}'
     )
-    
+
 
 channel.basic_consume(
     queue=TO_SERVICE_QUEUE,
