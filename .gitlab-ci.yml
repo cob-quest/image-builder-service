@@ -33,8 +33,9 @@ pytest:
   stage: Test
   image: python:3.11-slim
   before_script:
-    - pip3 install -r requirements.txt
-    - pip3 install -r requirements.test.txt
+    - python -V
+    - python -m pip install -r requirements.txt
+    - python -m pip install -r requirements.test.txt
   script:
     - pytest --junitxml=test-results.xml -vv
   artifacts:
