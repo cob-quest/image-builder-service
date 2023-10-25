@@ -29,15 +29,18 @@ pylint:
     paths:
       - pylint_report.txt
 
-# unit-tests:
-#   stage: Test
-#   image: docker:24.0.2
-#   services:
-#     - docker:24.0.2-dind
-#   before_script:
-#     - docker info
-#   script:
-#     - docker compose -f ci/compose.test.yaml up --exit-code-from crud-pytest
+pytest:
+  stage: Test
+  image: python:3.11-slim
+  before_script:
+    - pip install -r requirements.txt
+    - pip install -r requirements.test.txt
+  script:
+    - pytest --junitxml=test-results.xml
+  artifacts:
+    when: on_failure
+    paths:
+      - pytest_report.xml
 
 release-image:
   stage: Release
