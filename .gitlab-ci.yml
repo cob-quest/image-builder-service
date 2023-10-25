@@ -33,10 +33,10 @@ pytest:
   stage: Test
   image: python:3.11-slim
   before_script:
-    - pip install -r requirements.txt
-    - pip install -r requirements.test.txt
+    - pip3 install -r requirements.txt
+    - pip3 install -r requirements.test.txt
   script:
-    - pytest --junitxml=test-results.xml
+    - pytest --junitxml=test-results.xml -vv
   artifacts:
     when: on_failure
     paths:
