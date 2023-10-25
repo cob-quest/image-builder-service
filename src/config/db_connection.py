@@ -1,6 +1,6 @@
 import os, time
 
-from logger import logger
+from src.logger import logger
 from dotenv import load_dotenv
 from pymongo import MongoClient, errors, IndexModel, ASCENDING, DESCENDING
 

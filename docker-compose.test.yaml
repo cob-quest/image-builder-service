@@ -1,4 +1,5 @@
-version: "3"
+version: '3'
+
 services:
   ################################
   # Pytest on CRUD functions
@@ -6,5 +7,5 @@ services:
   crud-pytest:
     container_name: crud-pytest
     build:
-      context: ../
-      dockerfile: ci/Dockerfile.test
+      context: .
+      dockerfile: docker/Dockerfile.test
