@@ -36,6 +36,9 @@ pytest:
     - python -V
     - python -m pip install -r requirements.txt
     - python -m pip install -r requirements.test.txt
+    - apt-get update && apt-get install -y tree  # Install tree utility
+    - tree  # Display directory structure
+    - pwd
   script:
     - pytest --junitxml=test-results.xml -vv
   artifacts:
