@@ -1,8 +1,8 @@
-from src.config.db_connection import get_collection
+from config.db_connection import get_collection
 from pymongo import errors
-from src.models.Image import Image
-from src.models.Response import Response
-from src.logger import logger
+from models.Image import Image
+from models.Response import Response
+from logger import logger
 
 
 class CrudFunctions:
