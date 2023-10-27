@@ -4,7 +4,7 @@ import zipfile, subprocess, os, time
 from kaniko import Kaniko, KanikoSnapshotMode
 from logger import logger
 from bucket_connector import download_from_bucket
-from crud_functions import CrudFunctions
+from config.crud_functions import CrudFunctions
 
 # Create Kaniko instance
 kaniko = Kaniko()
