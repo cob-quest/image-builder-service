@@ -1,6 +1,6 @@
 import pytest
 from tests.conftest import client
-from src.config import crud_functions
+from . import crud_functions
 from tests.conftest import imageA, imageB
 
 #############
