@@ -10,6 +10,7 @@ class Image:
         'corId': {'type': 'string', 'required': True},
         'creatorName': {'type': 'string', 'required': True},
         'imageName': {'type': 'string', 'required': True},
+        'imageTag': {'type': 'string', 'required': True},
         'imageRegistryLink': {'type': 'string', 'required': True},
         's3Path': {'type': 'string', 'required': True}
     }
@@ -19,6 +20,7 @@ class Image:
         self.corId = kwargs.get('corId')
         self.creatorName = kwargs.get('creatorName')
         self.imageName = kwargs.get('imageName')
+        self.imageTag = kwargs.get('imageTag')
         self.imageRegistryLink = kwargs.get('imageRegistryLink')
         self.s3Path = kwargs.get('s3Path')
 
@@ -28,6 +30,7 @@ class Image:
             "corId": self.corId,
             "creatorName": self.creatorName,
             "imageName": self.imageName,
+            "imageTag": self.imageTag,
             "imageRegistryLink": self.imageRegistryLink,
             "s3Path": self.s3Path,
         }

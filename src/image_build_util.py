@@ -132,6 +132,7 @@ def handle_message(message: dict) -> bool:
         
         image_registry_link = f"{GLREGISTRY}/{name_tag}"
         message['imageRegistryLink'] = image_registry_link
+        message['imageTag'] = name_tag.split(":")[-1]
 
         # Write to DB
         DB.add_image(message)
