@@ -1,4 +1,6 @@
-import os, time
+import os, time, sys
+
+sys.path.append('./src')
 
 from logger import logger
 from dotenv import load_dotenv
@@ -6,13 +8,14 @@ from pymongo import MongoClient, errors, IndexModel, ASCENDING, DESCENDING
 
 load_dotenv('/app/secrets/.env')
 
-
 MONGODB_HOSTNAME = os.getenv("MONGODB_HOSTNAME")
 MONGODB_USERNAME = os.getenv("MONGODB_USERNAME")
 MONGODB_PASSWORD = os.getenv("MONGODB_PASSWORD")
 MONGODB_PORT = 27017
 
 MONGOURI = f'mongodb://{MONGODB_USERNAME}:{MONGODB_PASSWORD}@{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+# MONGOURI = f'mongodb://{MONGODB_HOSTNAME}:{MONGODB_PORT}'
+
 logger.info(MONGOURI)
 client = MongoClient(MONGOURI)
     
