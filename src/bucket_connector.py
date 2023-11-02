@@ -1,5 +1,7 @@
 import os
+import sys
 
+sys.path.append('/usr/image_builder/src')
 from google.cloud import storage
 from dotenv import load_dotenv
 from logger import logger

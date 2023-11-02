@@ -4,6 +4,7 @@ sys.path.append('./src/config')
 
 from db_connection import get_collection
 from pymongo import errors
+from db_connection import get_collection
 from models.Image import Image
 from models.Response import Response
 from logger import logger

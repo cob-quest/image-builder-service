@@ -1,10 +1,16 @@
 import string, random
-import zipfile, subprocess, os, time
+import zipfile, subprocess, os
+import sys
+
+sys.path.append('/usr/image_builder/src')
+sys.path.append('/usr/image_builder/src/models')
+sys.path.append('/usr/image_builder/src/config')
 
 from kaniko import Kaniko, KanikoSnapshotMode
 from logger import logger
 from bucket_connector import download_from_bucket
-from config.crud_functions import CrudFunctions
+from crud_functions import CrudFunctions
+# from tqdm.auto import tqdm
 
 # Create Kaniko instance
 kaniko = Kaniko()
@@ -20,8 +26,6 @@ DB = CrudFunctions()
 class ImageBuildFailedException(Exception):
     ...
 
-class ImagePushFailedException(Exception):
-    ...
 
 def create_name_tag(image_name: str, creator_name: str) -> str:
     creator_name = creator_name.lower().replace(' ', '-')
@@ -37,7 +41,7 @@ def build_image(image_name: str, creator_name: str) -> None:
 
     Returns: ``id``(str)
     '''
-    
+
     name_tag = create_name_tag(image_name, creator_name)
 
     logger.info(f"Building image {name_tag} from Dockerfile...")
@@ -45,7 +49,7 @@ def build_image(image_name: str, creator_name: str) -> None:
     try:
         kaniko.force = True
 
-        kaniko.build(
+        build_logs = kaniko.build(
             docker_registry_uri=GLREGISTRY,
             registry_username=GLUSERNAME,
             registry_password=GLTOKEN,
@@ -54,6 +58,9 @@ def build_image(image_name: str, creator_name: str) -> None:
             context="/usr/image_builder/image_to_build",
             snapshot_mode=KanikoSnapshotMode.time
         )
+        
+        # for item in 
+        
         logger.info("Image built! Function finished running")
         return name_tag
 
@@ -71,7 +78,7 @@ def extract_from_zip(filename: str) -> None:
     '''
 
     logger.info("Extracting zip file containing Dockerfile...")
-    
+
     base_filename = filename.split("/")[-1]
 
     try:
@@ -85,7 +92,7 @@ def extract_from_zip(filename: str) -> None:
 
 
 def set_up_image_to_build(message: dict) -> bool:
-    
+
     # Check for invalid message type
     if not message.get('s3Path', None):
         logger.error(f'Please specify s3 path for file to be downloaded!')
@@ -116,7 +123,7 @@ def handle_message(message: dict) -> bool:
 
     Returns: ``status``(bool)
     '''
-    
+
     # TODO: If image already exists in DB, exit
 
     # Set up image_to_build directory
@@ -129,7 +136,7 @@ def handle_message(message: dict) -> bool:
             message['imageName'], 
             message['creatorName']
         )
-        
+
         image_registry_link = f"{GLREGISTRY}/{name_tag}"
         message['imageRegistryLink'] = image_registry_link
         message['imageTag'] = name_tag.split(":")[-1]

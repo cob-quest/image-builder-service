@@ -2,6 +2,9 @@ import pika
 import json
 import os
 import time
+import sys
+
+sys.path.append("/usr/image_builder/src")
 
 from dotenv import load_dotenv
 from image_build_util import handle_message
