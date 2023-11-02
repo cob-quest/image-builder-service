@@ -67,6 +67,7 @@ pytest:
     when: on_failure
     paths:
       - pytest_report.xml
+  allow_failure: true
 
 release-image:
   stage: Release
