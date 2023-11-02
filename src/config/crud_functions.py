@@ -1,7 +1,13 @@
-from config.db_connection import get_collection
+import sys
+
+sys.path.append('/usr/image_builder/src')
+sys.path.append('/usr/image_builder/src/config')
+sys.path.append('/usr/image_builder/src/models')
+
 from pymongo import errors
-from models.Image import Image
-from models.Response import Response
+from db_connection import get_collection
+from Image import Image
+from Response import Response
 from logger import logger
 
 
