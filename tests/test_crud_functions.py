@@ -18,8 +18,8 @@ imageC = {
     "corId": "cor6969",
     "creatorName": "cs302",
     "imageName": "third_image",
-    "imageRegistryLink": "gitlab.com/third_image:1.0",
-    "s3Path": "github.com/s3/bye",
+    "imageTag": "latest-1234",
+    "imageRegistryLink": "gitlab.com/third_image:1.0"
 }
 
 #############

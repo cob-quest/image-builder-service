@@ -11,8 +11,7 @@ class Image:
         'creatorName': {'type': 'string', 'required': True},
         'imageName': {'type': 'string', 'required': True},
         'imageTag': {'type': 'string', 'required': True},
-        'imageRegistryLink': {'type': 'string', 'required': True},
-        's3Path': {'type': 'string', 'required': True}
+        'imageRegistryLink': {'type': 'string', 'required': True}
     }
 
     def __init__(self, **kwargs):
@@ -22,7 +21,6 @@ class Image:
         self.imageName = kwargs.get('imageName')
         self.imageTag = kwargs.get('imageTag')
         self.imageRegistryLink = kwargs.get('imageRegistryLink')
-        self.s3Path = kwargs.get('s3Path')
 
     def to_dict(self):
         return {
@@ -31,8 +29,7 @@ class Image:
             "creatorName": self.creatorName,
             "imageName": self.imageName,
             "imageTag": self.imageTag,
-            "imageRegistryLink": self.imageRegistryLink,
-            "s3Path": self.s3Path,
+            "imageRegistryLink": self.imageRegistryLink
         }
     
     def validate(self):

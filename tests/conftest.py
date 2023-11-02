@@ -7,8 +7,8 @@ imageA = {
     "corId": "cor69",
     "creatorName": "cs302",
     "imageName": "second_image",
-    "imageRegistryLink": "gitlab.com/first_image:1.0",
-    "s3Path": "github.com/s3/test",
+    "imageTag": "latest-1234",
+    "imageRegistryLink": "gitlab.com/first_image:1.0"
 }
 
 imageB = {
@@ -16,8 +16,8 @@ imageB = {
     "corId": "cor123",
     "creatorName": "cs302",
     "imageName": "first_image",
-    "imageRegistryLink": "gitlab.com/first_image:1.0",
-    "s3Path": "github.com/s3/hello",
+    "imageTag": "latest-1234",
+    "imageRegistryLink": "gitlab.com/first_image:1.0"
 }
 
 
@@ -28,6 +28,12 @@ def client():
     image_collection = db["image_builder"]
 
     image_collection.create_index([("corId", pymongo.ASCENDING)], unique=True)
+    image_collection.create_index(
+                [("creatorName", pymongo.ASCENDING),
+                ("imageName", pymongo.ASCENDING),
+                ("imageTag", pymongo.ASCENDING)],
+                unique=True
+            )
 
     image_collection.insert_many([imageA, imageB])
 
