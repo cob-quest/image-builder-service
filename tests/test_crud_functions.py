@@ -1,10 +1,12 @@
 import pytest
 import sys
+import os
 
-sys.path.append('/usr/image_builder/src/config')
+os.chdir('/usr/image_builder/src')
+sys.path.append('../tests')
 
 from conftest import client
-from crud_functions import CrudFunctions
+from config.crud_functions import CrudFunctions
 from conftest import imageA, imageB
 
 #############
