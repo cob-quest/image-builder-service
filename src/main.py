@@ -41,7 +41,7 @@ BUILDER_EXCHANGE = 'topic.imageBuilder'
 
 # Routing keys
 TO_SERVICE_ROUTING_KEY = 'imageBuilder.toService.*'
-FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.imageBuild'
+FROM_SERVICE_ROUTING_KEY = 'imageBuilder.fromService.imageCreated'
 
 # Declare queue
 channel.queue_declare(

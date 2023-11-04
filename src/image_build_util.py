@@ -28,7 +28,7 @@ class ImageBuildFailedException(Exception):
 
 def create_name_tag(image_name: str, image_tag: str, creator_name: str) -> str:
     '''
-    Tags will be in the format: {tag}-{4 char random string}
+    Image Name + Tags will be in the format: {name}:{version}-{creator}
     '''
     return f'{image_name}:{image_tag}-{creator_name}'
 
