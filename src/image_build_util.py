@@ -1,6 +1,7 @@
-import string, random
-import zipfile, subprocess, os
+import os
 import sys
+import zipfile
+import subprocess
 
 sys.path.append('/usr/image_builder/src')
 sys.path.append('/usr/image_builder/src/models')

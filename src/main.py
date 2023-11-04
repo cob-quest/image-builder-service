@@ -1,8 +1,8 @@
-import pika
-import json
+import sys
 import os
 import time
-import sys
+import json
+import pika
 
 sys.path.append("/usr/image_builder/src")
 

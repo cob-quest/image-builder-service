@@ -6,7 +6,7 @@ sys.path.append('./src')
 
 from dotenv import load_dotenv
 from logger import logger
-from pymongo import ASCENDING, DESCENDING, IndexModel, MongoClient, errors
+from pymongo import ASCENDING, MongoClient, errors
 
 load_dotenv('/app/secrets/.env')
 

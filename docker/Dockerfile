@@ -1,10 +1,11 @@
-FROM docker:24.0.2-dind
+FROM gcr.io/kaniko-project/executor:latest AS kaniko
 
-# Set up Python and Git
-RUN apk update && apk add --no-cache python3 python3-dev py3-pip git
+FROM python:3.11-slim
 
-# Set symbolic link from python3 to python
-# RUN ln -s /usr/bin/python3 /usr/bin/python
+ENV DOCKER_CONFIG /kaniko/.docker
+
+COPY --from=kaniko /kaniko /kaniko
+
 
 # Update pip and clean up cache to reduce image size
 RUN pip3 install --upgrade pip
@@ -15,6 +16,9 @@ WORKDIR /usr/image_builder
 
 # Copy your application code into the container
 COPY ./ /usr/image_builder/
+
+# Create the image_to_build directory
+RUN mkdir image_to_build
 
 # Optionally, install Python packages using pip
 RUN pip3 install --no-cache-dir -r requirements.txt
