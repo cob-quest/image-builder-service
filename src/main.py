@@ -83,7 +83,7 @@ def custom_callback(ch, method, props, body):
 
     # Respond to process engine through fromService queue
     corId = 'corId'
-    response_body = f'"corId": "{message_data[corId]}", "buildStatus": "{status}"'
+    response_body = f'"corId": "{message_data[corId]}", "eventStatus": "{status}"'
 
     channel.basic_publish(
         exchange=BUILDER_EXCHANGE,
