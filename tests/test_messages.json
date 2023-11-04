@@ -1,8 +1,9 @@
 [
     {
-        "corId": "DUMMY_COR_ID",
+        "corId": "DUMMY_COR_ID_0",
         "imageName": "my-new-img",
-        "creatorName": "johnny",
+        "imageTag": "v1.0",
+        "creatorName": "lavin",
         "s3Path": "challenge-zips/testing.zip"
     },
 

@@ -35,6 +35,15 @@ class CrudFunctions:
             return Response("Internal Server Error", "Unable to read data").to_dict()
 
 
+    def get_image_by_creator(self, data):
+        image = self.image_collection.find_one({
+            'imageName': data['imageName'],
+            'imageTag': data['imageTag'],
+            'creatorName': data['creatorName']
+        })
+        return image
+
+
     def get_image_by_ids(self, data={}):
         """Get images by the IDs provided;
             `_id` must be provided with a List value.
@@ -131,6 +140,22 @@ class CrudFunctions:
                     return Response("Not Found", "Image not found").to_dict()
             except errors.DuplicateKeyError as e:
                 return Response("Bad Request", f"Image name and version is duplicated!").to_dict()
+
+
+    def delete_image_by_creator(self, data):
+
+        # If this image does not exists
+        if not self.get_image_by_creator(data):
+            logger.info("No such image record exists")
+            return
+
+        # Remove the image
+        self.image_collection.delete_one({
+            'imageName': data['imageName'],
+            'imageTag': data['imageTag'],
+            'creatorName': data['creatorName']
+        })
+        logger.info("Image record deleted from DB")
 
 
     def delete_images_by_ids(self, data={}):

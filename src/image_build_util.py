@@ -10,7 +10,6 @@ from kaniko import Kaniko, KanikoSnapshotMode
 from logger import logger
 from bucket_connector import download_from_bucket
 from crud_functions import CrudFunctions
-# from tqdm.auto import tqdm
 
 # Create Kaniko instance
 kaniko = Kaniko()
@@ -27,13 +26,14 @@ class ImageBuildFailedException(Exception):
     ...
 
 
-def create_name_tag(image_name: str, creator_name: str) -> str:
-    creator_name = creator_name.lower().replace(' ', '-')
-    random_tag = ''.join([random.choice(string.ascii_letters + string.digits) for _ in range(4)])
-    return f"{image_name}:{creator_name}-{random_tag}"
+def create_name_tag(image_name: str, image_tag: str, creator_name: str) -> str:
+    '''
+    Tags will be in the format: {tag}-{4 char random string}
+    '''
+    return f'{image_name}:{image_tag}-{creator_name}'
 
 
-def build_image(image_name: str, creator_name: str) -> None:
+def build_image(name_tag: str) -> None:
     '''
     From the Dockerfile in image_to_build directory, build a docker image\n
 
@@ -42,14 +42,12 @@ def build_image(image_name: str, creator_name: str) -> None:
     Returns: ``id``(str)
     '''
 
-    name_tag = create_name_tag(image_name, creator_name)
-
     logger.info(f"Building image {name_tag} from Dockerfile...")
 
     try:
         kaniko.force = True
 
-        build_logs = kaniko.build(
+        kaniko.build(
             docker_registry_uri=GLREGISTRY,
             registry_username=GLUSERNAME,
             registry_password=GLTOKEN,
@@ -58,9 +56,7 @@ def build_image(image_name: str, creator_name: str) -> None:
             context="/usr/image_builder/image_to_build",
             snapshot_mode=KanikoSnapshotMode.time
         )
-        
-        # for item in 
-        
+
         logger.info("Image built! Function finished running")
         return name_tag
 
@@ -93,19 +89,19 @@ def extract_from_zip(filename: str) -> None:
 
 def set_up_image_to_build(message: dict) -> bool:
 
-    # Check for invalid message type
-    if not message.get('s3Path', None):
-        logger.error(f'Please specify s3 path for file to be downloaded!')
-        return False
-
-    # Depending on message, type, download files from S3 or clone from git
     try:
+        # Check for invalid message type
+        if not message.get('s3Path', None):
+            logger.error('Please specify s3 path for file to be downloaded!')
+            raise Exception
+
+        # Depending on message, type, download files from S3 or clone from git
         download_from_bucket(message['s3Path'])
         extract_from_zip(message['s3Path'])
         return True
 
     except:
-        return False
+        raise ImageBuildFailedException("Unable to set up image_to_build Directory... Exiting")
 
 
 def handle_message(message: dict) -> bool:
@@ -124,29 +120,32 @@ def handle_message(message: dict) -> bool:
     Returns: ``status``(bool)
     '''
 
-    # TODO: If image already exists in DB, exit
-
-    # Set up image_to_build directory
-    if not set_up_image_to_build(message):
-        logger.info("Unable to set up image_to_build Directory... Exiting")
+    # If image already exists in DB, exit
+    if DB.get_image_by_creator(message):
+        logger.info("Image already exists... Exiting")
         return False
 
+    # Write to DB
+    name_tag = create_name_tag(
+        message['imageName'], 
+        message['imageTag'],
+        message['creatorName']
+    )
+    message['imageRegistryLink'] = f"{GLREGISTRY}\{name_tag}"
+    DB.add_image(message)
+
     try:
-        name_tag = build_image(
-            message['imageName'], 
-            message['creatorName']
-        )
+        # Set up image_to_build directory
+        set_up_image_to_build(message)
 
-        image_registry_link = f"{GLREGISTRY}/{name_tag}"
-        message['imageRegistryLink'] = image_registry_link
-        message['imageTag'] = name_tag.split(":")[-1]
-
-        # Write to DB
-        DB.add_image(message)
+        build_image(name_tag)
         return True
-    
+
     except ImageBuildFailedException as e:
+        # Undo previous write to DB
         logger.error(e)
+        DB.delete_image_by_creator(message)
+        return False
 
     except Exception as e:
         logger.error(e)
