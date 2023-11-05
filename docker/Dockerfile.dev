@@ -6,7 +6,6 @@ ENV DOCKER_CONFIG /kaniko/.docker
 
 COPY --from=kaniko /kaniko /kaniko
 
-
 # Update pip and clean up cache to reduce image size
 RUN pip3 install --upgrade pip
 RUN rm -rf /var/cache/apk/*
