@@ -71,12 +71,12 @@ def custom_callback(ch, method, props, body):
 
     # If message was not handled successfully
     if not handle_message(message_data):
-        status = "FAIL"
+        status = "imageCreated"
         logger.error("Image build FAILED!")
 
     # Acknowledge upon successful
     else:
-        status = "SUCCESS"
+        status = "imageCreateFailed"
         logger.info("Image build COMPLETE!")
 
     logger.info("===============================")
